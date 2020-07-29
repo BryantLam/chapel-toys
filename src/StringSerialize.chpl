@@ -37,6 +37,12 @@ proc serialize(s: string): c_ptr(uint(8)) {
 }
 
 proc deserialize(type T, buffer: c_ptr(uint(8))): T where T == string {
+    defer {
+        if buffer {
+            c_free(buffer);
+        }
+    }
+
     {
         // Assert identField.
         var tmp = b"s";
@@ -57,14 +63,8 @@ proc deserialize(type T, buffer: c_ptr(uint(8))): T where T == string {
 
     try {
         var s = createStringWithNewBuffer(c_ptrTo(buffer[dataField]), numBytes);
-        if buffer {
-            c_free(buffer);
-        }
         return s;
     } catch {
-        if buffer {
-            c_free(buffer);
-        }
         halt("createStringWithNewBuffer");
     }
 }
