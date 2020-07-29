@@ -29,7 +29,8 @@ proc serialize(s: string): c_ptr(uint(8)) {
     var numBytes = s.numBytes :c_longlong; // c_int64 does not exist.
     assert(numBytes == s.numBytes);
     writeln(("numBytes", numBytes));
-    c_memcpy(c_ptrTo(buffer[sizeField]), c_ptrTo(numBytes), 8); // Cannot use s.numBytes directly.
+    // Cannot use c_ptrTo(s.numBytes). Convert from `int` to `c_<integral>` and use `numBytes` instead.
+    c_memcpy(c_ptrTo(buffer[sizeField]), c_ptrTo(numBytes), 8);
 
     c_memcpy(c_ptrTo(buffer[dataField]), s.c_str() :c_void_ptr, s.numBytes);
 
