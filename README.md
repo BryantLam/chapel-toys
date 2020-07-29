@@ -2,8 +2,8 @@
 
 Snippets of code for the [Chapel programming language][chpl].
 
-[chpl]: https://github.com/chapel-lang/chapel.
+[chpl]: https://github.com/chapel-lang/chapel
 
-These are toys; do not use this code for Serious Business.
+These are toys; use this code for Serious Business™ at your own risk.
 
 Unless explicitly noted, all code is under the MIT License.
