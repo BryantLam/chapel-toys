@@ -7,9 +7,8 @@ param identField = 0;
 param sizeField = 1;
 param dataField = 9;
 
-proc serialize(s: string): c_array(uint(8)) {
-    param bufferSize = 128; // How to runtime allocate this c_array?
-    var buffer = new c_array(uint(8), bufferSize);
+proc serialize(s: string): c_ptr(uint(8)) {
+    var buffer = c_malloc(uint(8), s.numBytes + dataField);
 
     //
     // Warning: Does not handle endian mismatch.
@@ -19,7 +18,6 @@ proc serialize(s: string): c_array(uint(8)) {
     //  byte 1-8 = 8-byte size of data
     //  byte 9+ = data
     //
-    assert(s.numBytes + dataField < bufferSize);
     if s.numBytes.type != int(64) then compilerError("size type is not 8 bytes"); // How to param check size of type?
 
     {
@@ -38,7 +36,7 @@ proc serialize(s: string): c_array(uint(8)) {
     return buffer;
 }
 
-proc deserialize(type T, buffer: c_array(uint(8))): T where T == string {
+proc deserialize(type T, buffer: c_ptr(uint(8))): T where T == string {
     {
         // Assert identField.
         var tmp = b"s";
@@ -49,12 +47,24 @@ proc deserialize(type T, buffer: c_array(uint(8))): T where T == string {
     var numBytes: c_longlong = 0;
     c_memcpy(c_ptrTo(numBytes), c_ptrTo(buffer[sizeField]), 8);
     assert(numBytes != 0);
+
+    try! write("[%02xu".format(buffer[0]));
+    for i in 1..<(numBytes + dataField) {
+        try! write(" %02xu".format(buffer[i]));
+    }
+    writeln("]");
     writeln(("numBytes", numBytes));
 
     try {
         var s = createStringWithNewBuffer(c_ptrTo(buffer[dataField]), numBytes);
+        if buffer {
+            c_free(buffer);
+        }
         return s;
     } catch {
+        if buffer {
+            c_free(buffer);
+        }
         halt("createStringWithNewBuffer");
     }
 }
