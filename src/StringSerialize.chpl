@@ -20,10 +20,7 @@ proc serialize(s: string): c_ptr(uint(8)) {
     //
     if s.numBytes.type != int(64) then compilerError("size type is not 8 bytes"); // How to param check size of type?
 
-    {
-        var tmp = b"s";
-        buffer[identField] = tmp[0] :uint(8); // How to cast character literal 's':uint(8)?
-    }
+    buffer[identField] = b"s".toByte();
 
     assert(c_sizeof(c_longlong) == c_sizeof(int(64))); // How to param check size of type?
     var numBytes = s.numBytes :c_longlong; // c_int64 does not exist.
@@ -44,11 +41,7 @@ proc deserialize(type T, buffer: c_ptr(uint(8))): T where T == string {
         }
     }
 
-    {
-        // Assert identField.
-        var tmp = b"s";
-        assert(buffer[identField] == tmp[0] :uint(8));
-    }
+    assert(buffer[identField] == b"s".toByte());
 
     // var numBytes: "".size.type = 0; // How to get string.size.type?
     var numBytes: c_longlong = 0;
